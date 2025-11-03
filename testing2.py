@@ -103,7 +103,7 @@ def drive_servo(channel, direction):
         pwm.setServoPulse(channel, 500)
 
 def angle_servo(channel, angle):
-    pulse = 500+(2000*(angle/180))
+    pulse = 500+(2000*(angle/360))
     pwm.setServoPulse(channel, pulse)
    
    
@@ -154,7 +154,7 @@ while keepPlaying:
                     if Dumped:
                         angle_servo(2, 0)
                     else:
-                        angle_servo(2, 180)
+                        angle_servo(2, 270)
             elif event.type == pygame.JOYBUTTONUP:
                 if joys.get_button(front_reverse):
                     drive_servo(0, "None")
