@@ -1,7 +1,14 @@
 import pygame
 import time
 import sys
-sys.path.append('/home/pi/Desktop/sphero-sdk-raspberrypi-python')
+
+import os
+main_dir = os.path.dirname(__file__)
+packages_path = os.path.join(main_dir, "Packages")
+sys.path.append(packages_path)
+
+sys.path.append("/home/pi/Desktop/Rvr-Code/BellAvr-RVR-Code/Packages/sphero-sdk-raspberrypi-python")
+
 from sphero_sdk import SpheroRvrObserver
 from sphero_sdk.common.enums.drive_enums import RawMotorModesEnum as RawMotorModes
 rvr = SpheroRvrObserver()
@@ -27,10 +34,10 @@ left_tread = 0
 right_tread = 0
 
 
-  
+
 
 def State():
-   rvr.raw_motors(
+    rvr.raw_motors(
         RawMotorModes.off, 0,
         RawMotorModes.off, 0
 ) 
@@ -65,11 +72,6 @@ def driver(left_t, right_t):
             drive_mode.append(right_mode[i])
         rvr.raw_motors(drive_mode[0], drive_mode[1], drive_mode[2], drive_mode[3])
 
-                
-            
-   
-   
-   
 while keepPlaying:
     clock.tick(60)
     for event in pygame.event.get():
@@ -84,8 +86,8 @@ while keepPlaying:
                 else:
                     left_tread = 0
                 if debug: print(left_tread)
-                 #print(f"Left: {left_tread}")     
-            if event.axis == 3: #Vert Movement
+                #print(f"Left: {left_tread}")     
+            if event.axis == 4: #Vert Movement
                 if event.value > 0.1:
                     right_tread = int(event.value * map_val) * -1
                 elif event.value < -0.1:
@@ -105,8 +107,3 @@ while keepPlaying:
             left_tread = 0
         print(left_tread, right_tread)
         driver(left_tread, right_tread)
-
-                
-                 
-                    
-        
