@@ -7,7 +7,7 @@ main_dir = os.path.dirname(__file__)
 packages_path = os.path.join(main_dir, "Packages")
 sys.path.append(packages_path)
 
-sys.path.append("/home/pi/Desktop/Rvr-Code/BellAvr-RVR-Code/Packages/sphero-sdk-raspberrypi-python")
+sys.path.append("/home/pi/sphero-sdk-raspberrypi-python")
 
 from sphero_sdk import SpheroRvrObserver
 from sphero_sdk.common.enums.drive_enums import RawMotorModesEnum as RawMotorModes

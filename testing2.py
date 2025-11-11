@@ -1,4 +1,4 @@
-import pygame
+
 import time
 import sys
 import json
@@ -15,29 +15,40 @@ with open('settings.json') as settings_file:
     
 
 Dumped = False
-
+Front_Driving = False
+Mid_Driving = False
 
 
 import os
-main_dir = os.path.dirname(__file__)
+os.environ["SDL_VIDEODRIVER"] = "dummy"
+os.environ["SDL_AUDIODRIVER"] = "dummy"
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+
+
+main_dir = os.path.dirname(os.path.realpath(__file__))
+
 packages_path = os.path.join(main_dir, "Packages")
 sphero_path = os.path.join(packages_path, "sphero-sdk-raspberrypi-python")
+
+import pygame
 
 sys.path.append(packages_path)
 sys.path.append(sphero_path)
 
-from PCA9685 import PCA9685 as PCA
+from PCA9685 import PCA9685
 from sphero_sdk import SpheroRvrObserver
 from sphero_sdk.common.enums.drive_enums import RawMotorModesEnum as RawMotorModes
 rvr = SpheroRvrObserver()
 rvr.wake()
 rvr.drive_control.reset_heading()
-map_val = 150
+map_val = 250
 pygame.init()
+pygame.display.init()
+pygame.display.set_mode((1,1))
 joysticks = []
 clock = pygame.time.Clock()
 keepPlaying = True
-debug = False
+debug = True
 print(sys.version)
 
 pwm = PCA9685(0x40, debug=False)
@@ -69,13 +80,13 @@ def State():
     #6 - counter front tread CCFT, 7 - clock front point CFP, 8 - clock front tread CFT, 9 - forwards FF
 
 def driver(left_t, right_t):
-    print(f"driving fed {left_t} {right_t}")
+
     drive_mode = []
     if left_t == 0 and right_t == 0:
         State()
-        if debug: print("Holding")
+        
     else:
-        print("not holding")
+        
         if left_t > 0:
             left_mode = (RawMotorModes.forward, left_t)
         elif left_t < 0:
@@ -96,9 +107,9 @@ def driver(left_t, right_t):
 
 def drive_servo(channel, direction):
     if direction == "Forward":
-        pwm.setServoPulse(channel,2500)
-    elif direction == "Reverse":
         pwm.setServoPulse(channel,600)
+    elif direction == "Reverse":
+        pwm.setServoPulse(channel,2500)
     else:
         pwm.setServoPulse(channel, 500)
 
@@ -111,7 +122,7 @@ def angle_servo(channel, angle):
 while keepPlaying:
     clock.tick(60)
     for event in pygame.event.get():
-        print(event)
+
         # The 0 button is the 'a' button, 1 is the 'b' button, 2 is the 'x' button, 3 is the 'y' button
         try:
             if event.axis == left_axis:
@@ -124,7 +135,7 @@ while keepPlaying:
                     left_tread = 0
                 if debug: print(left_tread)
                  #print(f"Left: {left_tread}")     
-            if event.axis == right_axis: #Vert Movement
+            elif event.axis == right_axis: #Vert Movement
                 if event.value > 0.1:
                     right_tread = int(event.value * map_val) * -1
                 elif event.value < -0.1:
@@ -133,40 +144,54 @@ while keepPlaying:
                     right_tread = 0
                 if debug: print(right_tread)
                 #print(f"Right: {right_tread}")
-            if event.axis == front_forward: #front servos
+            elif event.axis == front_forward: #front servos
                 if event.value > -0.9:
-                    drive_servo(0, "Forward")
+                    drive_servo(0, "Reverse")
                 else:
                     drive_servo(0, "None")
-            if event.axis == mid_forward:
+            elif event.axis == mid_forward:
                 if event.value > -0.9:
-                    drive_servo(1, "Forward")
+                    drive_servo(1, "Reverse")
                 else:
                     drive_servo(1, "None")
 
         except:
+            print("No Axis")
             if event.type == pygame.JOYBUTTONDOWN:
                 if joys.get_button(front_reverse):
-                    drive_servo(0, "Reverse")
+                    if Front_Driving:
+                        drive_servo(0, "None")
+                        Front_Driving = False
+                    else:
+                        drive_servo(0, "Forward")
+                        Front_Driving = True
                 if joys.get_button(mid_reverse):
-                    drive_servo(1, "Reverse")
+                    if Mid_Driving:
+                        drive_servo(1, "None")
+                        Mid_Driving = False
+                    else:
+                        drive_servo(1, "Forward")
+                        Mid_Driving = True
                 if joys.get_button(dump_toggle):
                     if Dumped:
-                        angle_servo(2, 0)
+                        angle_servo(2, 180)
+                        Dumped = False
+
                     else:
-                        angle_servo(2, 270)
-            elif event.type == pygame.JOYBUTTONUP:
-                if joys.get_button(front_reverse):
-                    drive_servo(0, "None")
-                if joys.get_button(mid_reverse):
-                    drive_servo(1, "None")
+                        angle_servo(2, 0)
+                        Dumped = True
+            else:
+                print("Event Not JOYBUTTON")
+
+
         try:
             right_tread = right_tread
             left_tread = left_tread
         except:
+            print("tread Net")
             right_tread = 0
             left_tread = 0
-        print(left_tread, right_tread)
+        if debug: print(left_tread, right_tread)
         driver(left_tread, right_tread)
 
                 
