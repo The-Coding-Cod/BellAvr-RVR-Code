@@ -113,8 +113,8 @@ def drive_servo(channel, direction):
     else:
         pwm.setServoPulse(channel, 500)
 
-def angle_servo(channel, angle):
-    pulse = 500+(2000*(angle/360))
+def angle_servo(channel, angle, angle_max):
+    pulse = 500+(2000*(angle/angle_max))
     pwm.setServoPulse(channel, pulse)
    
    
@@ -174,12 +174,13 @@ while keepPlaying:
                         Mid_Driving = True
                 if joys.get_button(dump_toggle):
                     if Dumped:
-                        angle_servo(2, 180)
+                        angle_servo(2, 180, 180)
                         Dumped = False
-
+                        print("Not Dumped")
                     else:
-                        angle_servo(2, 0)
+                        angle_servo(2, 0, 180)
                         Dumped = True
+                        print("Dumped")
             else:
                 print("Event Not JOYBUTTON")
 
