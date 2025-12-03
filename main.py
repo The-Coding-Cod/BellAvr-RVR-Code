@@ -48,7 +48,7 @@ pygame.display.set_mode((1,1))
 joysticks = []
 clock = pygame.time.Clock()
 keepPlaying = True
-debug = True
+debug = False
 print(sys.version)
 
 pwm = PCA9685(0x40, debug=False)
@@ -64,8 +64,7 @@ for i in range(0, pygame.joystick.get_count()):
     joysticks[-1].init()
     # print a statement telling what the name of the controller is
     if debug: print ("Detected joystick "),joysticks[-1].get_name(),"'"
-left_tread = 0
-right_tread = 0
+
 
 
   
@@ -117,16 +116,18 @@ def angle_servo(channel, angle, angle_max):
     pulse = 500+(2000*(angle/angle_max))
     pwm.setServoPulse(channel, pulse)
    
-   
-   
+left_tread = 0
+right_tread = 0
+prev_l_tread = 0
+prev_r_tread= 0
 while keepPlaying:
     clock.tick(60)
-    for event in pygame.event.get():
 
-        # The 0 button is the 'a' button, 1 is the 'b' button, 2 is the 'x' button, 3 is the 'y' button
-        try:
+    pygame.event.pump()
+    
+    for event in pygame.event.get():
+        if event.type == pygame.JOYAXISMOTION:
             if event.axis == left_axis:
-                    #left Tread
                 if event.value > 0.1:
                     left_tread = int(event.value * map_val) * -1
                 elif event.value < -0.1:
@@ -154,8 +155,7 @@ while keepPlaying:
                     drive_servo(1, "Reverse")
                 else:
                     drive_servo(1, "None")
-
-        except:
+        elif event.type == pygame.JOYBUTTONDOWN:
             print("No Axis")
             if event.type == pygame.JOYBUTTONDOWN:
                 if joys.get_button(front_reverse):
@@ -183,17 +183,11 @@ while keepPlaying:
                         print("Dumped")
             else:
                 print("Event Not JOYBUTTON")
-
-
-        try:
-            right_tread = right_tread
-            left_tread = left_tread
-        except:
-            print("tread Net")
-            right_tread = 0
-            left_tread = 0
+        if (left_tread != prev_l_tread) or (right_tread != prev_r_tread):
+            driver(left_tread, right_tread)
+            prev_l_tread = left_tread
+            prev_r_tread = right_tread
         if debug: print(left_tread, right_tread)
-        driver(left_tread, right_tread)
 
                 
                  
