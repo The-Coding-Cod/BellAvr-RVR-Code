@@ -14,71 +14,71 @@ To calibrate, run the calibration.py and then note which inputs do what. Then Fi
 Run it using a monitor or setup Xfvb on the pi for running it from SSH
 
 # Adding SSH
-In order to SSH from anywhere, you need to get the Pi to host its own network. Here's how through commands:
+__In order to SSH from anywhere, you need to get the Pi to host its own network. Here's how through commands:__
 
-sudo systemctl stop wpa_supplicant
+sudo systemctl stop wpa_supplicant  
 sudo systemctl disable wpa_supplicant
 
 sudo nano /etc/dhcpcd.conf
 
-Add to bottom of file:
+__Add to bottom of file:__
 
-interface wlan0
-static ip_address=192.168.4.1/24
+interface wlan0  
+static ip_address=192.168.4.1/24  
 nohook wpa_supplicant
 
-Save that and Exit
+__Save that and Exit__
 
 sudo nano /etc/hostapd/hostapd.conf
 
-You will see (or must add):
+__You will see (or must add):__
 
-interface=wlan0
-driver=l80211
-ssid= !ADD WIFI NAME HERE!
-hw_mode=g
-channel=7
-auth_algs=1
-wpa=2
-wpa_passphrase=!ADD PASSWORD HERE!
-wpa_key_mgmt=WPA-PSK
+interface=wlan0  
+driver=l80211  
+ssid= !ADD WIFI NAME HERE!  
+hw_mode=g  
+channel=7  
+auth_algs=1  
+wpa=2  
+wpa_passphrase=!ADD PASSWORD HERE!  
+wpa_key_mgmt=WPA-PSK  
 rsn_pairwise=CCMP
 
-Save and Exit
+__Save and Exit__
 
-sudo systemctl enable hostapd
+sudo systemctl enable hostapd  
 sudo systemctl enable dnsmasq
 
-sudo systemctl start hostapd
+sudo systemctl start hostapd  
 sudo systemctl start dnsmasq
 
 sudo systemctl restart dhcpcd
 
 sudo reboot
 
-Now to get updates for this repo, you need to connect again. Here's how through the command prompt:
+__Now to get updates for this repo, you need to connect again. Here's how through the command prompt:__
 
-sudo systemctl stop hostapd
+sudo systemctl stop hostapd  
 sudo systemctl stop dnsmasq
 
-sudo systemctl disable hostapd
+sudo systemctl disable hostapd  
 sudo systemctl disable dnsmasq
 
 sudo nano /etc/dhcpcd.conf
 
-Comment this out with #:
+__Comment this out with #:__
 
-interface wlan0
-static ip_address=192.168.4.1/24
+interface wlan0  
+static ip_address=192.168.4.1/24  
 nohook wpa_supplicant
 
-Save and Exit
+__Save and Exit__
 
-sudo systemctl enable wpa_supplicant
+sudo systemctl enable wpa_supplicant  
 sudo systemctl start wpa_supplicant
 
 sudo systemctl restart dhcpcd
 
 sudo reboot
 
-You should now be able to connect to wifi
+__You should now be able to connect to wifi__
