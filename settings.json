@@ -2,9 +2,9 @@
     "Right_Axis" : 4,
     "Left_Axis" : 1,
     "Front_Forward" : 5,
-    "Mid_Forward" : 2,
+    "Mid_Forward" : 4,
     "Front_Reverse" : 5,
-    "Mid_Reverse" : 4,
+    "Mid_Reverse" : 2,
     "Dump_Toggle" : 0
 
 }

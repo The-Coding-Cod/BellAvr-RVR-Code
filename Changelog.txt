@@ -1,0 +1,4 @@
+Added threading to reduce lag
+More user friendly code
+Properly match json to functions
+Added a more detailed README

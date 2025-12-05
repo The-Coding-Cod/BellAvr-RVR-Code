@@ -1,7 +1,17 @@
-
 import time
 import sys
 import json
+import threading
+from pathlib import Path
+import os
+
+main_dir = Path(__file__).resolve().parent.parent #ADJUST
+packages_path = main_dir / "Packages"
+sphero_path = packages_path / "sphero-sdk-raspberrypi-python"
+sys.path.append(packages_path)
+sys.path.append(sphero_path)
+
+import pygame
 
 with open('settings.json') as settings_file:
     settings = json.load(settings_file)
@@ -13,28 +23,6 @@ with open('settings.json') as settings_file:
     mid_reverse = settings["Mid_Reverse"]
     dump_toggle = settings["Dump_Toggle"]
     
-
-Dumped = False
-Front_Driving = False
-Mid_Driving = False
-
-
-import os
-os.environ["SDL_VIDEODRIVER"] = "dummy"
-os.environ["SDL_AUDIODRIVER"] = "dummy"
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
-
-main_dir = os.path.dirname(os.path.realpath(__file__))
-
-packages_path = os.path.join(main_dir, "Packages")
-sphero_path = os.path.join(packages_path, "sphero-sdk-raspberrypi-python")
-
-import pygame
-
-sys.path.append(packages_path)
-sys.path.append(sphero_path)
-
 from PCA9685 import PCA9685
 from sphero_sdk import SpheroRvrObserver
 from sphero_sdk.common.enums.drive_enums import RawMotorModesEnum as RawMotorModes
@@ -65,9 +53,6 @@ for i in range(0, pygame.joystick.get_count()):
     # print a statement telling what the name of the controller is
     if debug: print ("Detected joystick "),joysticks[-1].get_name(),"'"
 
-
-
-  
 def State():
    rvr.raw_motors(
         RawMotorModes.off, 0,
@@ -125,12 +110,29 @@ left_tread = 0
 right_tread = 0
 prev_l_tread = 0
 prev_r_tread= 0
+Dumped = False
+Front_Driving = False
+Mid_Driving = False
 
+def driving_thread_function():
+    global left_tread, right_tread, prev_l_tread, prev_r_tread
+    pRTread = prev_r_tread
+    pLTread = prev_l_tread
+    while keepPlaying:
+        lt = left_tread
+        rt = right_tread
+        if lt != pLTread or rt != pRTread:
+            driver(left_tread, right_tread)
+            prev_l_tread = left_tread
+            prev_r_tread = right_tread
+        time.sleep(0.05)
+
+drive_thread = threading.Thread(target=driving_thread_function, daemon=True)
+drive_thread.start()
 
 while keepPlaying:
     clock.tick(60)
     pygame.event.pump()
-
     for event in pygame.event.get():
         if event.type == pygame.JOYAXISMOTION:
             if event.axis == left_axis: #Left Tread Control
@@ -183,12 +185,3 @@ while keepPlaying:
                     angle_servo(2, 0, 180)
                     Dumped = True
                     print("Dumped")
-        if (left_tread != prev_l_tread) or (right_tread != prev_r_tread):
-            driver(left_tread, right_tread)
-            prev_l_tread = left_tread
-            prev_r_tread = right_tread
-
-                
-                 
-                    
-        
